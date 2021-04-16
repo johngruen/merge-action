@@ -1,18 +1,32 @@
-name: Scheduled Merge Remote Action
-on: 
+name: Sync Upstream
+
+env:
+  # Required, URL to upstream (fork base)
+  UPSTREAM_URL: "https://github.com/pixelpixelpixelpixel/merge-action.git"
+  # Optional, defaults to main
+  UPSTREAM_BRANCH: "main"
+  # Optional, defaults to UPSTREAM_BRANCH
+  DOWNSTREAM_BRANCH: ""
+  # Optional merge arguments
+  MERGE_ARGS: ""
+  # Optional push arguments
+  PUSH_ARGS: ""
+
+# This runs every day on 1801 UTC
+on:
+  # Allows manual workflow run (must in default branch to work)
   workflow_dispatch:
+
 jobs:
-  merge-upstream:
+  build:
     runs-on: ubuntu-latest
-    steps: 
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          ref: main            # set the branch to merge to
-          fetch-depth: 0 
-      - name: Merge Upstream
-        uses: exions/merge-upstream@v1
-        with:
-          upstream: pixelpixelpixelpixel/merge-action      # set the upstream repo
-          upstream-branch: main   # set the upstream branch to merge from
-          branch: main          # set the branch to merge to
+    steps:
+      - name: GitHub Sync to Upstream Repository
+        uses: dabreadman/sync-upstream-repo@v1.0.0.b
+        with: 
+          upstream_repo: ${{ env.UPSTREAM_URL }}
+          upstream_branch: ${{ env.UPSTREAM_BRANCH }}
+          downstream_branch: ${{ env.DOWNSTREAM_BRANCH }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          merge_args: ${{ env.MERGE_ARGS }}
+          push_args: ${{ env.PUSH_ARGS }}
